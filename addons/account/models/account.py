@@ -883,6 +883,10 @@ class AccountTaxGroup(models.Model):
 
     name = fields.Char(required=True, translate=True)
     sequence = fields.Integer(default=10)
+    post_total = fields.Boolean("Show after total", default=False,
+        help=("Check, if this levy group should not be "
+              "considered part of the total sum on invoices "
+              "and orders."))
 
 class AccountTax(models.Model):
     _name = 'account.tax'
