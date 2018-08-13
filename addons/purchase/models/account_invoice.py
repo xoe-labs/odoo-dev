@@ -93,6 +93,11 @@ class AccountInvoice(models.Model):
             return {}
         if not self.partner_id:
             self.partner_id = self.purchase_id.partner_id.id
+            # When _set_additional_fields is called later
+            # it should count on a state of the invoice *after* a partner onchange
+            # This is consistent with the invoice state feeded to _set_additional_fields
+            # on sales orders (there: in the create method, after any onchage)
+            self._onchange_partner_id()
 
         vendor_ref = self.purchase_id.partner_ref
         if vendor_ref and (not self.reference or (
