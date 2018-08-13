@@ -2082,10 +2082,8 @@ exports.Order = Backbone.Model.extend({
             fiscal_position_id: this.fiscal_position ? this.fiscal_position.id : false
         };
     },
-    export_for_printing: function(){
+    _export_for_printing: function(){
         var orderlines = [];
-        var self = this;
-
         this.orderlines.each(function(orderline){
             orderlines.push(orderline.export_for_printing());
         });
@@ -2100,23 +2098,6 @@ exports.Order = Backbone.Model.extend({
         var shop    = this.pos.shop;
         var date    = new Date();
 
-        function is_xml(subreceipt){
-            return subreceipt ? (subreceipt.split('\n')[0].indexOf('<!DOCTYPE QWEB') >= 0) : false;
-        }
-
-        function render_xml(subreceipt){
-            if (!is_xml(subreceipt)) {
-                return subreceipt;
-            } else {
-                subreceipt = subreceipt.split('\n').slice(1).join('\n');
-                var qweb = new QWeb2.Engine();
-                    qweb.debug = core.debug;
-                    qweb.default_dict = _.clone(QWeb.default_dict);
-                    qweb.add_template('<templates><t t-name="subreceipt">'+subreceipt+'</t></templates>');
-
-                return qweb.render('subreceipt',{'pos':self.pos,'widget':self.pos.chrome,'order':self, 'receipt': receipt}) ;
-            }
-        }
 
         var receipt = {
             orderlines: orderlines,
@@ -2164,7 +2145,31 @@ exports.Order = Backbone.Model.extend({
             },
             currency: this.pos.currency,
         };
+        return receipt;
 
+    },
+    export_for_printing: function(){
+        var self = this;
+
+
+        function is_xml(subreceipt){
+            return subreceipt ? (subreceipt.split('\n')[0].indexOf('<!DOCTYPE QWEB') >= 0) : false;
+        }
+
+        function render_xml(subreceipt){
+            if (!is_xml(subreceipt)) {
+                return subreceipt;
+            } else {
+                subreceipt = subreceipt.split('\n').slice(1).join('\n');
+                var qweb = new QWeb2.Engine();
+                    qweb.debug = config.debug;
+                    qweb.default_dict = _.clone(QWeb.default_dict);
+                    qweb.add_template('<templates><t t-name="subreceipt">'+subreceipt+'</t></templates>');
+
+                return qweb.render('subreceipt',{'pos':self.pos,'widget':self.pos.chrome,'order':self, 'receipt': receipt}) ;
+            }
+        }
+        var receipt = this._export_for_printing();
         if (is_xml(this.pos.config.receipt_header)){
             receipt.header = '';
             receipt.header_xml = render_xml(this.pos.config.receipt_header);
