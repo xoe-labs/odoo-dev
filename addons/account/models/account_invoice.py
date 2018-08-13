@@ -896,6 +896,23 @@ class AccountInvoice(models.Model):
                 else:
                     tax_grouped[key]['amount'] += val['amount']
                     tax_grouped[key]['base'] += val['base']
+        return self._check_tax_minimum_base(tax_grouped)
+
+    def _check_tax_minimum_base(self, tax_grouped):
+        # Can be inherited to implement a diferent base condition
+        base_check = {}
+        to_delete = []
+        Tax = self.env['account.tax']
+        for vals in tax_grouped.values():
+            base_check.setdefault(vals['tax_id'], 0.0)
+            base_check[vals['tax_id']] += vals['base']
+        for tax_id, base in base_check.items():
+            tax_base = Tax.browse(tax_id).minimum_base
+            if not base > tax_base:
+                to_delete.append(tax_id)
+        for grouping_key, vals in tax_grouped.items():
+            if vals['tax_id'] in to_delete:
+                tax_grouped.pop(grouping_key)
         return tax_grouped
 
     @api.multi

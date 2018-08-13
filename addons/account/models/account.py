@@ -769,6 +769,7 @@ class AccountTax(models.Model):
     refund_account_id = fields.Many2one('account.account', domain=[('deprecated', '=', False)], string='Tax Account on Credit Notes', ondelete='restrict',
         help="Account that will be set on invoice tax lines for credit notes. Leave empty to use the expense account.", oldname='account_paid_id')
     description = fields.Char(string='Label on Invoices', translate=True)
+    minimum_base = fields.Float("Minimum document-wide base amount", help="If set, this tax only applies on any given document (eg. invoice) if all it's bases sum up at least to this minimum amount.")
     price_include = fields.Boolean(string='Included in Price', default=False,
         help="Check this if the price you use on the product and invoices includes this tax.")
     include_base_amount = fields.Boolean(string='Affect Base of Subsequent Taxes', default=False,
