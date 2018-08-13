@@ -79,6 +79,7 @@ class StockPickingBatch(models.Model):
 class StockPicking(models.Model):
     _inherit = "stock.picking"
 
+    sequence = fields.Integer('Sequence', help="Used for ordering in batch pickings.", default=100)
     batch_id = fields.Many2one(
         'stock.picking.batch', string='Batch Transfer',
         check_company=True,
