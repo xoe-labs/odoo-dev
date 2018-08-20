@@ -4,6 +4,7 @@ import argparse
 import os
 import re
 import sys
+import json
 
 import jinja2
 
@@ -23,6 +24,10 @@ class Scaffold(Command):
             '-t', '--template', type=template, default=template('default'),
             help="Use a custom module template, can be a template name or the"
                  " path to a module template (default: %(default)s)")
+        parser.add_argument(
+            '-j', '--json', type=json.loads, default='{}',
+            help="Load a parameters json dict that will be passed to the"
+                 " jinja2 environment (default: %(default)s)")
         parser.add_argument('name', help="Name of the module to create")
         parser.add_argument(
             'dest', default='.', nargs='?',
@@ -32,10 +37,12 @@ class Scaffold(Command):
             sys.exit(parser.print_help())
         args = parser.parse_args(args=cmdargs)
 
+        params = {'name': args.name}
+        params.update(args.json)
         args.template.render_to(
             snake(args.name),
             directory(args.dest, create=True),
-            {'name': args.name})
+            params)
 
     def epilog(self):
         return "Built-in templates available are: %s" % ', '.join(
