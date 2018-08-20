@@ -366,6 +366,10 @@ class configmanager(object):
 
         self.rcfile = os.path.abspath(
             self.config_file or opt.config or os.environ.get('ODOO_RC') or os.environ.get('OPENERP_SERVER') or rcfilepath)
+        if os.path.isdir(self.rcfile):
+            self.rcfiles = sorted([os.path.join(self.rcfile, f) for f in os.listdir(self.rcfile) if os.path.isfile(os.path.join(self.rcfile, f))])
+        else:
+            self.rcfiles = [self.rcfile]
         self.load()
 
         # Verify that we want to log or not, if not the output will go to stdout
@@ -503,7 +507,7 @@ class configmanager(object):
     def load(self):
         p = ConfigParser.ConfigParser()
         try:
-            p.read([self.rcfile])
+            p.read(self.rcfiles)
             for (name,value) in p.items('options'):
                 if value=='True' or value=='true':
                     value = True
