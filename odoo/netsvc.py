@@ -16,6 +16,11 @@ import odoo
 import sql_db
 import tools
 
+try:
+    from pythonjsonlogger import jsonlogger
+except ImportError:
+    jsonlogger = None
+
 _logger = logging.getLogger(__name__)
 
 def log(logger, level, prefix, msg, depth=None):
@@ -107,6 +112,17 @@ class ColoredFormatter(DBFormatter):
         record.levelname = COLOR_PATTERN % (30 + fg_color, 40 + bg_color, record.levelname)
         return DBFormatter.format(self, record)
 
+if jsonlogger:
+    class JSONFormatter(jsonlogger.JsonFormatter):
+        def formatException(self, exc_info):
+            result = super(JSONFormatter, self).formatException(exc_info)
+            # Also provide the error's class & module name in a parseable way
+            return exc_info[0].__module__ + '.' + exc_info[0].__name__ + ' >>>> ' + result
+        def format(self, record):
+            record.pid = os.getpid()
+            record.dbname = getattr(threading.currentThread(), 'dbname', '?')
+            return jsonlogger.JsonFormatter.format(self, record)
+
 _logger_init = False
 def init_logger():
     global _logger_init
@@ -169,6 +185,8 @@ def init_logger():
 
     if os.name == 'posix' and isinstance(handler, logging.StreamHandler) and is_a_tty(handler.stream):
         formatter = ColoredFormatter(format)
+    elif jsonlogger:
+        formatter = JSONFormatter(format)
     else:
         formatter = DBFormatter(format)
     handler.setFormatter(formatter)
