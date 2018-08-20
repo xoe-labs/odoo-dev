@@ -69,10 +69,16 @@ class configmanager(object):
                       from Python code without resorting to environment
                       variable
         """
+        # Check for a bind-mounted secrets file
+        try:
+            admin_pwd_file = open(os.environ.get('ODOO_PASSFILE', "/run/secrets/adminpwd"),"r").read().splitlines()[0]
+        except:
+            admin_pwd_file = None
+
         # Options not exposed on the command line. Command line options will be added
         # from optparse's parser.
         self.options = {
-            'admin_passwd': 'admin',
+            'admin_passwd': admin_pwd_file and admin_pwd_file or 'admin',
             'csv_internal_sep': ',',
             'publisher_warranty_url': 'http://services.openerp.com/publisher-warranty/',
             'reportgz': False,
