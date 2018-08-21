@@ -3,6 +3,7 @@
 
 import uuid
 
+from functools import partial
 from itertools import groupby
 from datetime import datetime, timedelta
 from werkzeug.urls import url_encode
@@ -159,6 +160,7 @@ class SaleOrder(models.Model):
     note = fields.Text('Terms and conditions', default=_default_note)
 
     amount_untaxed = fields.Monetary(string='Untaxed Amount', store=True, readonly=True, compute='_amount_all', track_visibility='onchange')
+    amount_by_group = fields.Binary(string="Taxe amount by group", compute='_amount_by_group', help="type: [(name, amount, base, formated amount, formated base)]")
     amount_tax = fields.Monetary(string='Taxes', store=True, readonly=True, compute='_amount_all')
     amount_total = fields.Monetary(string='Total', store=True, readonly=True, compute='_amount_all', track_visibility='always')
 
@@ -574,6 +576,29 @@ class SaleOrder(models.Model):
             order.analytic_account_id = analytic
 
     @api.multi
+    def _amount_by_group(self):
+        for order in self:
+            currency = order.currency_id or order.company_id.currency_id
+            fmt = partial(formatLang, self.with_context(lang=order.partner_id.lang).env, currency_obj=currency)
+            res = {}
+            for line in self.order_line:
+                price_reduce = line.price_unit * (1.0 - line.discount / 100.0)
+                taxes = line.tax_id.compute_all(price_reduce, quantity=line.product_uom_qty, product=line.product_id, partner=self.partner_shipping_id)['taxes']
+                for tax in line.tax_id:
+                    group = tax.tax_group_id
+                    res.setdefault(group, {'amount': 0.0, 'base': 0.0})
+                    for t in taxes:
+                        if t['id'] == tax.id or t['id'] in tax.children_tax_ids.ids:
+                            res[group]['amount'] += t['amount']
+                            res[group]['base'] += t['base']
+            res = sorted(res.items(), key=lambda l: l[0].sequence)
+            order.amount_by_group = [(
+                l[0].name, l[1]['amount'], l[1]['base'],
+                fmt(l[1]['amount']), fmt(l[1]['base']),
+                len(res),
+            ) for l in res]
+
+    @api.multi
     def order_lines_layouted(self):
         """
         Returns this order lines classified by sale_layout_category and separated in
@@ -594,24 +619,6 @@ class SaleOrder(models.Model):
             })
 
         return report_pages
-
-    @api.multi
-    def _get_tax_amount_by_group(self):
-        self.ensure_one()
-        res = {}
-        for line in self.order_line:
-            price_reduce = line.price_unit * (1.0 - line.discount / 100.0)
-            taxes = line.tax_id.compute_all(price_reduce, quantity=line.product_uom_qty, product=line.product_id, partner=self.partner_shipping_id)['taxes']
-            for tax in line.tax_id:
-                group = tax.tax_group_id
-                res.setdefault(group, {'amount': 0.0, 'base': 0.0})
-                for t in taxes:
-                    if t['id'] == tax.id or t['id'] in tax.children_tax_ids.ids:
-                        res[group]['amount'] += t['amount']
-                        res[group]['base'] += t['base']
-        res = sorted(res.items(), key=lambda l: l[0].sequence)
-        res = [(l[0].name, l[1]['amount'], l[1]['base'], len(res)) for l in res]
-        return res
 
     @api.multi
     def get_access_action(self, access_uid=None):
