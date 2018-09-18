@@ -55,10 +55,10 @@ class Scaffold(Command):
 
     def _dialogue(self):
         options = {}
-        summary = input("Write a short summary (optional): ")
+        summary = raw_input("Write a short summary (optional): ")
         if summary:
             options['summary'] = summary
-        description = input("Write a description (optional): ")
+        description = raw_input("Write a description (optional): ")
         if description:
             options['description'] = description
         if pick:
