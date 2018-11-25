@@ -3,26 +3,27 @@
 # * stock
 # 
 # Translators:
-# Linas Versada <paulius.sladkevicius@gmail.com>, 2017
-# Silvija Butko <silvija.butko@gmail.com>, 2017
-# digitouch UAB <digitouchagencyeur@gmail.com>, 2017
 # Audrius Palenskis <audrius.palenskis@gmail.com>, 2017
-# Martin Trigaux, 2017
-# UAB "Draugiški sprendimai" <transifex@draugiskisprendimai.lt>, 2017
-# Anatolij, 2017
-# Rolandas <info@paninfo.lt>, 2017
-# Arminas Grigonis <arminas@versada.lt>, 2017
+# Šarūnas Ažna <sarunas.azna@gmail.com>, 2017
 # Monika Raciunaite <monika.raciunaite@gmail.com>, 2017
 # Antanas Muliuolis <an.muliuolis@gmail.com>, 2017
-# Šarūnas Ažna <sarunas.azna@gmail.com>, 2017
+# Rolandas <info@paninfo.lt>, 2017
+# Anatolij, 2017
+# Arminas Grigonis <arminas@versada.lt>, 2017
+# UAB "Draugiški sprendimai" <transifex@draugiskisprendimai.lt>, 2017
+# digitouch UAB <digitouchagencyeur@gmail.com>, 2017
+# Martin Trigaux, 2017
 # Eimantas <eimantas@focusate.eu>, 2018
+# Silvija Butko <silvija.butko@gmail.com>, 2018
+# Linas Versada <linaskrisiukenas@gmail.com>, 2018
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 11.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-07-27 11:55+0000\n"
-"PO-Revision-Date: 2018-07-27 11:55+0000\n"
-"Last-Translator: Eimantas <eimantas@focusate.eu>, 2018\n"
+"PO-Revision-Date: 2017-09-20 10:24+0000\n"
+"Last-Translator: Linas Versada <linaskrisiukenas@gmail.com>, 2018\n"
 "Language-Team: Lithuanian (https://www.transifex.com/odoo/teams/41243/lt/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -928,7 +929,7 @@ msgstr ""
 #. module: stock
 #: model:ir.ui.view,arch_db:stock.view_overprocessed_transfer
 msgid "Are you sure you want to validate this picking?"
-msgstr "Ar Jūs tikrai norite patvirtinti šį važtaraštį?"
+msgstr "Ar tikrai norite patvirtinti šį paėmimą?"
 
 #. module: stock
 #: selection:stock.picking,move_type:0
@@ -2127,12 +2128,12 @@ msgstr "Tikslo perkėlimai"
 #: model:ir.model.fields,field_description:stock.field_stock_move_line_result_package_id
 #: model:ir.ui.view,arch_db:stock.view_move_line_form
 msgid "Destination Package"
-msgstr ""
+msgstr "Tikslinė pakuotė"
 
 #. module: stock
 #: model:ir.ui.view,arch_db:stock.message_body
 msgid "Destination Package :"
-msgstr ""
+msgstr "Tikslinė pakuotė:"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_move_route_ids
@@ -2589,7 +2590,7 @@ msgstr "HDD SH-1"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_move_has_move_lines
 msgid "Has Move Lines"
-msgstr ""
+msgstr "Turi perkėlimo eilučių"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_picking_move_line_exist
@@ -2609,7 +2610,7 @@ msgstr "Turi nurašymo perkėlimų"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_picking_has_tracking
 msgid "Has Tracking"
-msgstr ""
+msgstr "Turi sekimą"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_location_posz
@@ -3416,7 +3417,7 @@ msgstr "Laptop E5023"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_picking_type_last_done_picking
 msgid "Last 10 Done Pickings"
-msgstr "Paskutinės 10 atlliktų siuntų"
+msgstr "Paskutiniai 10 atliktų paėmimų"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_procurement_group___last_update
@@ -3974,7 +3975,7 @@ msgstr "Perkėlimo eilutės"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_procurement_rule_procure_method
 msgid "Move Supply Method"
-msgstr ""
+msgstr "Perkėlimo tiekimo būdas"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_move_date
@@ -4795,7 +4796,7 @@ msgstr "Perkėlimui pridėkite eilučių"
 #: code:addons/stock/models/stock_picking.py:868
 #, python-format
 msgid "Please process some quantities to put in the pack first!"
-msgstr ""
+msgstr "Pirmiausia apdorokite į pakuotę dedamus kiekius!"
 
 #. module: stock
 #: code:addons/stock/wizard/stock_picking_return.py:130
@@ -5419,7 +5420,7 @@ msgstr "Numeris"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_picking_type_sequence_id
 msgid "Reference Sequence"
-msgstr "Nurodyti seką"
+msgstr "Numerių seka"
 
 #. module: stock
 #: sql_constraint:stock.picking:0
@@ -6281,7 +6282,7 @@ msgstr ""
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_location_route_supplied_wh_id
 msgid "Supplied Warehouse"
-msgstr ""
+msgstr "Tiekiamas sandėlis"
 
 #. module: stock
 #: model:ir.ui.view,arch_db:stock.inventory_planner
@@ -7715,7 +7716,7 @@ msgstr ""
 #: code:addons/stock/models/stock_move.py:1169
 #, python-format
 msgid "You cannot split a move done"
-msgstr ""
+msgstr "Negalite išskaidyti atlikto perkėlimo"
 
 #. module: stock
 #: code:addons/stock/models/stock_quant.py:86
@@ -7733,6 +7734,8 @@ msgid ""
 "You cannot use the same serial number twice. Please correct the serial "
 "numbers encoded."
 msgstr ""
+"Negalite naudoti to paties serijinio numerio du kartus. Pataisykite "
+"serijinius numerius."
 
 #. module: stock
 #: code:addons/stock/models/stock_picking.py:723
@@ -7740,7 +7743,7 @@ msgstr ""
 msgid ""
 "You cannot validate a transfer if you have not processed any quantity for "
 "%s."
-msgstr ""
+msgstr "Negalite patvirtinti perkėlimo, jei neapdorojote jokio %s kiekio."
 
 #. module: stock
 #: code:addons/stock/models/stock_picking.py:707
@@ -7749,6 +7752,8 @@ msgid ""
 "You cannot validate a transfer if you have not processed any quantity. You "
 "should rather cancel the transfer."
 msgstr ""
+"Negalite patvirtinti perkėlimo, jei neapdorojote jokio kiekio. Turėtumėte "
+"atšaukti perkėlimą."
 
 #. module: stock
 #: model:ir.ui.view,arch_db:stock.report_picking
@@ -7762,6 +7767,7 @@ msgstr ""
 #, python-format
 msgid "You have manually created product lines, please delete them to proceed"
 msgstr ""
+"Produktų eilutes sukūrėte rankini būdu, norėdami tęsti, ištrinkite jas"
 
 #. module: stock
 #: model:ir.ui.view,arch_db:stock.view_backorder_confirmation
@@ -7794,6 +7800,8 @@ msgid ""
 "You have to select a product unit of measure in the same category than the "
 "default unit of measure of the product"
 msgstr ""
+"Turite pasirinkti tos pačios kategorijos matavimo vienetą, kaip numatytasis "
+"produkto matavimo vienetas"
 
 #. module: stock
 #: code:addons/stock/models/stock_location.py:111
@@ -7807,6 +7815,8 @@ msgid ""
 "You haven't entered <i>done</i> quantities, by clicking on <i>apply</i>\n"
 "                        Odoo will process all the <i>reserved</i> quantities."
 msgstr ""
+"Neįvedėte <i>aliktų</i> kiekių. Paspaudus <i>pritaikyt</i>\n"
+"\"Odoo\" apdoros visus <i>rezervuotus</i>kiekius."
 
 #. module: stock
 #: code:addons/stock/wizard/stock_picking_return.py:46
