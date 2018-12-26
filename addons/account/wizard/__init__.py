@@ -6,6 +6,7 @@ from . import account_unreconcile
 from . import account_invoice_refund
 from . import account_invoice_state
 from . import account_validate_account_move
+from . import chart_wizards
 from . import pos_box
 from . import account_move_reversal
 from . import account_report_common

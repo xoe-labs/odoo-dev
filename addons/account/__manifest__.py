@@ -54,6 +54,7 @@ You could use this simplified accounting in case you work with an (external) acc
         'views/report_payment_receipt_templates.xml',
         'data/payment_receipt_data.xml',
         'wizard/setup_wizards_view.xml',
+        'wizard/chart_wizards_views.xml',
         'views/account_onboarding_templates.xml',
         'data/service_cron_reverse.xml',
         'views/account_fiscal_year_view.xml',
