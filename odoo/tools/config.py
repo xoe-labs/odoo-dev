@@ -142,6 +142,9 @@ class configmanager(object):
         group.add_option("--proxy-mode", dest="proxy_mode", action="store_true", my_default=False,
                          help="Activate reverse proxy WSGI wrappers (headers rewriting) "
                               "Only enable this when running behind a trusted web proxy!")
+        group.add_option("--redis", dest="redis_session_store", my_default=False,
+                             help="Enable/No enable redis session store")
+
         # HTTP: hidden backwards-compatibility for "*xmlrpc*" options
         hidden = optparse.SUPPRESS_HELP
         group.add_option("--xmlrpc-interface", dest="http_interface", help=hidden)
@@ -411,7 +414,7 @@ class configmanager(object):
                 'db_maxconn', 'import_partial', 'addons_path',
                 'syslog', 'without_demo',
                 'dbfilter', 'log_level', 'log_db',
-                'log_db_level', 'geoip_database', 'dev_mode', 'shell_interface'
+                'log_db_level', 'geoip_database', 'dev_mode', 'shell_interface', 'redis_session_store',
         ]
 
         for arg in keys:
