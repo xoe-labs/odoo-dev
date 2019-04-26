@@ -129,6 +129,8 @@ class configmanager(object):
                          help="Enable correct behavior when behind a reverse proxy")
         group.add_option("--longpolling-port", dest="longpolling_port", my_default=8072,
                          help="specify the TCP port for longpolling requests", type="int")
+        group.add_option("--redis", dest="redis_session_store", my_default=False,
+                             help="Enable/No enable redis session store")
         parser.add_option_group(group)
 
         # WEB
@@ -386,7 +388,7 @@ class configmanager(object):
                 'db_maxconn', 'import_partial', 'addons_path',
                 'xmlrpc', 'syslog', 'without_demo',
                 'dbfilter', 'log_level', 'log_db',
-                'log_db_level', 'geoip_database', 'dev_mode', 'shell_interface'
+                'log_db_level', 'geoip_database', 'dev_mode', 'shell_interface', 'redis_session_store',
         ]
 
         for arg in keys:
