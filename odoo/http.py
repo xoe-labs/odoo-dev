@@ -45,6 +45,9 @@ try:
 except ImportError:
     psutil = None
 
+from .session import RedisSessionStore
+
+
 import odoo
 from odoo import fields
 from .service.server import memory_info
@@ -64,6 +67,8 @@ rpc_response = logging.getLogger(__name__ + '.rpc.response')
 # (attachments with unique hash in the URL, ...)
 STATIC_CACHE = 3600 * 24 * 7
 STATIC_CACHE_LONG = 3600 * 24 * 365
+
+DEFAULT_SESSION_TIMEOUT = 60 * 60 * 24 * 7  # 7 days in seconds
 
 # To remove when corrected in Babel
 babel.core.LOCALE_ALIASES['nb'] = 'nb_NO'
@@ -1162,9 +1167,11 @@ class OpenERPSession(werkzeug.contrib.sessions.Session):
 
 
 def session_gc(session_store):
+    if odoo.tools.config.get('redis_session_store', None):
+        return
     if random.random() < 0.001:
         # we keep session one week
-        last_week = time.time() - 60*60*24*7
+        last_week = time.time() - DEFAULT_SESSION_TIMEOUT
         for fname in os.listdir(session_store.path):
             path = os.path.join(session_store.path, fname)
             try:
@@ -1271,6 +1278,10 @@ class Root(object):
 
     @lazy_property
     def session_store(self):
+        # Returns redis session class
+        if odoo.tools.config.get('redis_session_store', None):
+            return RedisSessionStore(session_class=OpenERPSession)
+
         # Setup http sessions
         path = odoo.tools.config.session_dir
         _logger.debug('HTTP sessions stored in: %s', path)
