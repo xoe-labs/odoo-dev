@@ -192,8 +192,19 @@ class StockRule(models.Model):
         }
         return new_move_vals
 
+    def _run_pull(self, product_id, product_qty, product_uom, location_id, name, origin, values):
+        """ create new wrapper method _run_pull_new
+        for preserves the original _run_pull
+        """
+
+        Procurement = namedtuple('Procurement', ['product_id', 'product_qty', 'product_uom', 'location_id', 'name', 'origin', 'company_id', 'values'])
+        assert isinstance(values.get('company_id'), models.Model), "A RecordSet is expected here"
+        procurements = []
+        procurements.append((Procurement(product_id, product_qty, product_uom, location_id, name, origin, values.get('company_id'), values), self))
+        return self._run_pull_new(procurements)
+
     @api.model
-    def _run_pull(self, procurements):
+    def _run_pull_new(self, procurements):
         moves_values_by_company = defaultdict(list)
         mtso_products_by_locations = defaultdict(list)
 
@@ -245,17 +256,24 @@ class StockRule(models.Model):
         return []
 
     def _get_stock_move_values(self, product_id, product_qty, product_uom, location_id, name, origin, company_id, values):
+        """ create new wrapper method _get_stock_move_values_new
+        for preserves the original get_stock_move_values
+        """
+        group_id = False
+        if self.group_propagation_option == 'propagate':
+            group_id = values.get('group_id', False) and values['group_id'].id
+        elif self.group_propagation_option == 'fixed':
+            group_id = self.group_id.id
+
+        return self._get_stock_move_values_new(product_id, product_qty, product_uom, location_id, name, origin, values, group_id)
+
+    def _get_stock_move_values_new(self, product_id, product_qty, product_uom, location_id, name, origin, values, group_id):
         ''' Returns a dictionary of values that will be used to create a stock move from a procurement.
         This function assumes that the given procurement has a rule (action == 'pull' or 'pull_push') set on it.
 
         :param procurement: browse record
         :rtype: dictionary
         '''
-        group_id = False
-        if self.group_propagation_option == 'propagate':
-            group_id = values.get('group_id', False) and values['group_id'].id
-        elif self.group_propagation_option == 'fixed':
-            group_id = self.group_id.id
 
         date_expected = fields.Datetime.to_string(
             fields.Datetime.from_string(values['date_planned']) - relativedelta(days=self.delay or 0)
