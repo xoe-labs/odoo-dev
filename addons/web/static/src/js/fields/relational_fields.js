@@ -35,6 +35,19 @@ var qweb = core.qweb;
 // Many2one widgets
 //------------------------------------------------------------------------------
 
+/**
+* manages option 'create quick records' for relational fields
+*/
+
+AbstractField = AbstractField.extend({
+    init: function(parent){
+        this._super.apply(this, arguments)
+        this.nodeOptions = _.defaults(this.nodeOptions, {
+            no_quick_create: odoo.session_info.no_quick_create_records,
+        });
+    },
+})
+
 var M2ODialog = Dialog.extend({
     template: "M2ODialog",
     init: function (parent, name, value) {

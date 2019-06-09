@@ -66,6 +66,7 @@ class Http(models.AbstractModel):
                 "qweb": qweb_checksum,
                 "translations": hashlib.sha512(translations_json_utf8).hexdigest()[:64],  # sha512/256
             },
+            "no_quick_create_records": user.has_group('web.group_no_quick_create_records'),
         }
 
     @api.model
