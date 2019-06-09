@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+    <record id="group_no_quick_create_records" model="res.groups">
+      <field name="name">No quick create records </field>
+    </record>
+  </data>
+</odoo>

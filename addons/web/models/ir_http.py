@@ -39,7 +39,8 @@ class Http(models.AbstractModel):
             "user_companies": {'current_company': (user.company_id.id, user.company_id.name), 'allowed_companies': [(comp.id, comp.name) for comp in user.company_ids]} if display_switch_company_menu else False,
             "currencies": self.get_currencies() if request.session.uid else {},
             "web.base.url": self.env['ir.config_parameter'].sudo().get_param('web.base.url', default=''),
-            "show_effect": True
+            "show_effect": True,
+            "no_quick_create_records": user.has_group('web.group_no_quick_create_records'),
         }
 
     def get_currencies(self):
