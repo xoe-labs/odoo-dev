@@ -125,6 +125,7 @@ class AccountChartTemplate(models.Model):
     property_stock_account_input_categ_id = fields.Many2one('account.account.template', string="Input Account for Stock Valuation", oldname="property_stock_account_input_categ")
     property_stock_account_output_categ_id = fields.Many2one('account.account.template', string="Output Account for Stock Valuation", oldname="property_stock_account_output_categ")
     property_stock_valuation_account_id = fields.Many2one('account.account.template', string="Account Template for Stock Valuation")
+    property_account_creditor_price_difference_categ = fields.Many2one('account.account.template', string="Account Template for Price Difference Account")
 
     @api.model
     def _prepare_transfer_account_template(self):
@@ -484,6 +485,7 @@ class AccountChartTemplate(models.Model):
             'property_stock_account_input_categ_id',
             'property_stock_account_output_categ_id',
             'property_stock_valuation_account_id',
+            'property_account_creditor_price_difference_categ',
         ]
         for stock_property in stock_properties:
             account = getattr(self, stock_property)
