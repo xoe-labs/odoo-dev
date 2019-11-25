@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from collections import namedtuple
+
 from datetime import timedelta
 
 from odoo.addons.stock.tests.common import TestStockCommon
 from odoo.exceptions import UserError
 from odoo.tests import Form
+from odoo.tests.common import tagged
+
+from odoo.addons.stock.models.stock_rule import ProcurementGroup
 
 
 class TestPickShip(TestStockCommon):
@@ -2042,7 +2047,11 @@ class TestStockUOM(TestStockCommon):
         self.assertEqual(len(back_order_in), 1.00, 'There should be one back order created')
         self.assertEqual(back_order_in.move_lines.product_qty, 91640.00, 'There should be one back order created')
 
+def patched_run(self, procurements):
+    for proc in procurements:
+        ProcurementGroup.run(self, *proc)
 
+@tagged('post_install')
 class TestRoutes(TestStockCommon):
     def setUp(self):
         super(TestRoutes, self).setUp()
@@ -2052,6 +2061,8 @@ class TestRoutes(TestStockCommon):
             'categ_id': self.env.ref('product.product_category_all').id,
         })
         self.uom_unit = self.env.ref('uom.product_uom_unit')
+        setattr(ProcurementGroup,'Procurement', namedtuple('Procurement', ['product_id', 'product_qty', 'product_uom', 'location_id', 'name', 'origin', 'values']))
+        setattr(ProcurementGroup, '_new_run', patched_run)
         self.partner = self.env['res.partner'].create({'name': 'Partner'})
 
     def _enable_pick_ship(self):
@@ -2059,6 +2070,7 @@ class TestRoutes(TestStockCommon):
 
         # create and get back the pick ship route
         self.wh.write({'delivery_steps': 'pick_ship'})
+
         self.pick_ship_route = self.wh.route_ids.filtered(lambda r: '(pick + ship)' in r.name)
 
     def test_pick_ship_1(self):
@@ -2221,7 +2233,7 @@ class TestRoutes(TestStockCommon):
 
         pg = self.env['procurement.group'].create({'name': 'Test-pg-mtso-mto'})
 
-        self.env['procurement.group'].run([
+        pg._new_run([
             pg.Procurement(
                 product_a,
                 5.0,
@@ -2229,7 +2241,7 @@ class TestRoutes(TestStockCommon):
                 final_location,
                 'test_mtso_mto',
                 'test_mtso_mto',
-                warehouse.company_id,
+                # warehouse.company_id,
                 {
                     'warehouse_id': warehouse,
                     'group_id': pg
@@ -2275,7 +2287,7 @@ class TestRoutes(TestStockCommon):
 
         pg = self.env['procurement.group'].create({'name': 'Test-pg-mtso-mts'})
 
-        self.env['procurement.group'].run([
+        pg._new_run([
             pg.Procurement(
                 product_a,
                 4.0,
@@ -2283,7 +2295,7 @@ class TestRoutes(TestStockCommon):
                 final_location,
                 'test_mtso_mts',
                 'test_mtso_mts',
-                warehouse.company_id,
+                # warehouse.company_id,
                 {
                     'warehouse_id': warehouse,
                     'group_id': pg
@@ -2322,42 +2334,43 @@ class TestRoutes(TestStockCommon):
         pg1 = self.env['procurement.group'].create({'name': 'Test-pg-mtso-mts-1'})
         pg2 = self.env['procurement.group'].create({'name': 'Test-pg-mtso-mts-2'})
         pg3 = self.env['procurement.group'].create({'name': 'Test-pg-mtso-mts-3'})
+        pg = self.env['procurement.group']
 
-        self.env['procurement.group'].run([
-            pg1.Procurement(
+        pg._new_run([
+            pg.Procurement(
                 product_a,
                 2.0,
                 product_a.uom_id,
                 final_location,
                 'test_mtso_mts_1',
                 'test_mtso_mts_1',
-                warehouse.company_id,
+                # warehouse.company_id,
                 {
                     'warehouse_id': warehouse,
                     'group_id': pg1
                 }
             ),
-            pg2.Procurement(
+            pg.Procurement(
                 product_a,
                 2.0,
                 product_a.uom_id,
                 final_location,
                 'test_mtso_mts_2',
                 'test_mtso_mts_2',
-                warehouse.company_id,
+                # warehouse.company_id,
                 {
                     'warehouse_id': warehouse,
                     'group_id': pg2
                 }
             ),
-            pg3.Procurement(
+            pg.Procurement(
                 product_a,
                 2.0,
                 product_a.uom_id,
                 final_location,
                 'test_mtso_mts_3',
                 'test_mtso_mts_3',
-                warehouse.company_id,
+                # warehouse.company_id,
                 {
                     'warehouse_id': warehouse,
                     'group_id': pg3
@@ -2410,9 +2423,10 @@ class TestRoutes(TestStockCommon):
         })
 
         pg = self.env['procurement.group'].create({'name': 'Test-delay_alert'})
+        pg1 = self.env['procurement.group']
 
-        self.env['procurement.group'].run([
-            pg.Procurement(
+        pg1._new_run([
+            pg1.Procurement(
                 product_a,
                 4.0,
                 product_a.uom_id,
@@ -2425,7 +2439,7 @@ class TestRoutes(TestStockCommon):
                     'group_id': pg
                 }
             ),
-            pg.Procurement(
+            pg1.Procurement(
                 product_b,
                 4.0,
                 product_a.uom_id,
