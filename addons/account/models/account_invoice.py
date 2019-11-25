@@ -57,18 +57,24 @@ class AccountInvoice(models.Model):
     def _compute_amount(self):
         round_curr = self.currency_id.round
         self.amount_untaxed = sum(line.price_subtotal for line in self.invoice_line_ids)
-        self.amount_tax = sum(round_curr(line.amount_total) for line in self.tax_line_ids)
+        self.amount_tax = sum(round_curr(line.amount_total) for line in self.tax_line_ids if not line.tax_id.tax_group_id.post_total)
+        self.amount_other_levies = sum(round_curr(line.amount_total) for line in self.tax_line_ids if line.tax_id.tax_group_id.post_total)
         self.amount_total = self.amount_untaxed + self.amount_tax
+        self.amount_to_pay = self.amount_total + self.amount_other_levies
         amount_total_company_signed = self.amount_total
         amount_untaxed_signed = self.amount_untaxed
+        amount_to_pay_company_signed = self.amount_to_pay
         if self.currency_id and self.company_id and self.currency_id != self.company_id.currency_id:
             currency_id = self.currency_id
             amount_total_company_signed = currency_id._convert(self.amount_total, self.company_id.currency_id, self.company_id, self.date_invoice or fields.Date.today())
             amount_untaxed_signed = currency_id._convert(self.amount_untaxed, self.company_id.currency_id, self.company_id, self.date_invoice or fields.Date.today())
+            amount_to_pay_company_signed = currency_id._convert(self.amount_to_pay, self.company_id.currency_id, self.company_id, self.date_invoice or fields.Date.today())
         sign = self.type in ['in_refund', 'out_refund'] and -1 or 1
         self.amount_total_company_signed = amount_total_company_signed * sign
         self.amount_total_signed = self.amount_total * sign
         self.amount_untaxed_signed = amount_untaxed_signed * sign
+        self.amount_to_pay_signed = self.amount_to_pay * sign
+        self.amount_to_pay_company_signed = amount_to_pay_company_signed* sign
 
     def _compute_sign_taxes(self):
         for invoice in self:
@@ -350,6 +356,7 @@ class AccountInvoice(models.Model):
         help="Link to the automatically generated Journal Items.")
 
     amount_by_group = fields.Binary(string="Tax amount by group", compute='_amount_by_group', help="type: [(name, amount, base, formated amount, formated base)]")
+    amount_by_group_post_total = fields.Binary(string="Tax amount by group (post total)", compute='_amount_by_group', help="type: [(name, amount, base, formated amount, formated base)]")
     amount_untaxed = fields.Monetary(string='Untaxed Amount',
         store=True, readonly=True, compute='_compute_amount', tracking=True)
     amount_untaxed_signed = fields.Monetary(string='Untaxed Amount in Company Currency', currency_field='company_currency_id',
@@ -360,6 +367,10 @@ class AccountInvoice(models.Model):
         store=True, readonly=True, compute='_compute_amount')
     amount_tax_signed = fields.Monetary(string='Tax in Invoice Currency', currency_field='currency_id',
         readonly=True, compute='_compute_sign_taxes')
+    amount_other_levies = fields.Monetary(string='Other levies',
+        store=True, readonly=True, compute='_compute_amount')
+    amount_other_levies_signed = fields.Monetary(string='Other levies in Invoice Currency', currency_field='currency_id',
+        readonly=True, compute='_compute_sign_taxes')
     amount_total = fields.Monetary(string='Total',
         store=True, readonly=True, compute='_compute_amount')
     amount_total_signed = fields.Monetary(string='Total in Invoice Currency', currency_field='currency_id',
@@ -368,6 +379,14 @@ class AccountInvoice(models.Model):
     amount_total_company_signed = fields.Monetary(string='Total in Company Currency', currency_field='company_currency_id',
         store=True, readonly=True, compute='_compute_amount',
         help="Total amount in the currency of the company, negative for credit notes.")
+    amount_to_pay = fields.Monetary(string='To Pay',
+        store=True, readonly=True, compute='_compute_amount')
+    amount_to_pay_signed = fields.Monetary(string='To pay in Invoice Currency', currency_field='currency_id',
+        store=True, readonly=True, compute='_compute_amount',
+        help="Total amount to pay after levies in the currency of the invoice, negative for credit notes.")
+    amount_to_pay_company_signed = fields.Monetary(string='To pay in Company Currency', currency_field='company_currency_id',
+        store=True, readonly=True, compute='_compute_amount',
+        help="Total amount to pay after levies in the currency of the company, negative for credit notes.")
     currency_id = fields.Many2one('res.currency', string='Currency',
         required=True, readonly=True, states={'draft': [('readonly', False)]},
         default=_default_currency, tracking=True)
@@ -1771,7 +1790,12 @@ class AccountInvoice(models.Model):
                 r[0][0].name, r[1]['amount'], r[1]['base'],
                 fmt(r[1]['amount']), fmt(r[1]['base']),
                 len(res),
-            ) for r in res]
+            ) for r in res if not r[0][0].post_total]
+            invoice.amount_by_group_post_total = [(
+                r[0][0].name, r[1]['amount'], r[1]['base'],
+                fmt(r[1]['amount']), fmt(r[1]['base']),
+                len(res),
+            ) for r in res if r[0][0].post_total]
 
     @api.multi
     def preview_invoice(self):
