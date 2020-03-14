@@ -208,6 +208,7 @@
                 <group>
                     <field name="name"/>
                     <field name="partner_id"/>
+                    <field name="partner_group"/>
                     <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" class="oe_inline"/>
                 </group>
                 <newline/>
@@ -380,7 +381,7 @@
     </record>
 
     <menuitem id="menu_action_hr_salary_rule_form" action="action_salary_rule_form" parent="menu_hr_payroll_configuration" sequence="12"/>
-  
+
     <act_window name="All Children Rules"
         domain="[('parent_rule_id', '=', active_id)]"
         res_model="hr.salary.rule"
