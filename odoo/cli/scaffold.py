@@ -5,13 +5,74 @@ import argparse
 import os
 import re
 import sys
+import json
 
 import jinja2
+
+try:
+    from pick import pick
+except:
+    pick = None
+
+# See /base/module/module_data.xml
+MODULE_CATEGORIES = [
+    'Accounting',
+    'Discuss',
+    'Document Management',
+    'eCommerce',
+    'Human Resources',
+    'Industries',
+    'Localization',
+    'Manufacturing',
+    'Marketing',
+    'Point of Sale',
+    'Productivity',
+    'Project',
+    'Purchases',
+    'Sales',
+    'Warehouse',
+    'Website',
+    'Extra Tools',
+    'Hidden',
+]
+# See /base/module/module.py
+MODULE_LICENCES = [
+    'GPL-2',
+    'GPL-2 or any later version',
+    'GPL-3',
+    'GPL-3 or any later version',
+    'AGPL-3',
+    'LGPL-3',
+    'Other OSI approved licence',
+    'OEEL-1',
+    'OPL-1',
+    'Other proprietary',
+]
 
 from . import Command
 
 class Scaffold(Command):
     """ Generates an Odoo module skeleton. """
+
+    def _dialogue(self):
+        options = {}
+        summary = input("Write a short summary (optional): ")
+        if summary:
+            options['summary'] = summary
+        description = input("Write a description (optional): ")
+        if description:
+            options['description'] = description
+        if pick:
+            title = 'Choose the module category: '
+            # See /base/module/module_data.xml
+            selection = MODULE_CATEGORIES
+            options['category'], _ = pick(selection, title)
+            title = 'Choose the module license: '
+            # See /base/module/module.py
+            selection = MODULE_LICENCES
+            options['license'], _ = pick(selection, title)
+        return options
+
 
     def run(self, cmdargs):
         # TODO: bash completion file
@@ -24,6 +85,10 @@ class Scaffold(Command):
             '-t', '--template', type=template, default=template('default'),
             help="Use a custom module template, can be a template name or the"
                  " path to a module template (default: %(default)s)")
+        parser.add_argument(
+            '-j', '--json', type=json.loads, default='{}',
+            help="Load a parameters json dict that will be passed to the"
+                 " jinja2 environment (default: %(default)s)")
         parser.add_argument('name', help="Name of the module to create")
         parser.add_argument(
             'dest', default='.', nargs='?',
@@ -32,11 +97,15 @@ class Scaffold(Command):
         if not cmdargs:
             sys.exit(parser.print_help())
         args = parser.parse_args(args=cmdargs)
+        options = self._dialogue()
 
+        params = {'name': args.name}
+        params.update(args.json)
+        params.update(options)
         args.template.render_to(
             snake(args.name),
             directory(args.dest, create=True),
-            {'name': args.name})
+            params)
 
     def epilog(self):
         return "Built-in templates available are: %s" % ', '.join(
