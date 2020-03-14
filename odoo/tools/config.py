@@ -590,6 +590,8 @@ class configmanager(object):
             pass
 
     def save(self):
+        if os.path.isdir(self.rcfile):
+            sys.stderr.write("ERROR: cannot write out config file when using config directories\n")
         p = ConfigParser.RawConfigParser()
         loglevelnames = dict(pycompat.izip(self._LOGLEVELS.values(), self._LOGLEVELS))
         p.add_section('options')
