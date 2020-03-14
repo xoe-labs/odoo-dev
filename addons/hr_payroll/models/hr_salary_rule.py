@@ -227,7 +227,7 @@ class HrSalaryRule(models.Model):
         else:
             try:
                 safe_eval(self.amount_python_compute, localdict, mode='exec', nocopy=True)
-                return float(localdict['result']), 'result_qty' in localdict and localdict['result_qty'] or 1.0, 'result_rate' in localdict and localdict['result_rate'] or 100.0
+                return float(localdict['result']), localdict.get('result_qty', 1.0), localdict.get('result_rate', 100.0)
             except:
                 raise UserError(_('Wrong python code defined for salary rule %s (%s).') % (self.name, self.code))
 
@@ -250,7 +250,7 @@ class HrSalaryRule(models.Model):
         else:  # python code
             try:
                 safe_eval(self.condition_python, localdict, mode='exec', nocopy=True)
-                return 'result' in localdict and localdict['result'] or False
+                return  localdict.get('result', False)
             except:
                 raise UserError(_('Wrong python condition defined for salary rule %s (%s).') % (self.name, self.code))
 
