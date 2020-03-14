@@ -1755,6 +1755,7 @@ exports.Orderline = Backbone.Model.extend({
         }
         var total_excluded = round_pr(price_unit * quantity, currency_rounding);
         var total_included = total_excluded;
+        var total_void = total_excluded;
         var base = total_excluded;
         _(taxes).each(function(tax) {
             if (!no_map_tax){
@@ -1768,6 +1769,7 @@ exports.Orderline = Backbone.Model.extend({
                 total_excluded = ret.total_excluded;
                 base = ret.total_excluded;
                 total_included = ret.total_included;
+                total_void = ret.total_void;
                 list_taxes = list_taxes.concat(ret.taxes);
             }
             else {
@@ -1785,6 +1787,9 @@ exports.Orderline = Backbone.Model.extend({
                     if (tax.include_base_amount) {
                         base += tax_amount;
                     }
+                    if (!tax.account_id) {
+                        total_void += tax_amount;
+                    }
                     var data = {
                         id: tax.id,
                         amount: tax_amount,
@@ -1797,7 +1802,8 @@ exports.Orderline = Backbone.Model.extend({
         return {
             taxes: list_taxes,
             total_excluded: round_pr(total_excluded, currency_rounding_bak),
-            total_included: round_pr(total_included, currency_rounding_bak)
+            total_included: round_pr(total_included, currency_rounding_bak),
+            total_void: round_pr(total_void, currency_rounding_bak)
         };
     },
     get_all_prices: function(){
@@ -1825,6 +1831,7 @@ exports.Orderline = Backbone.Model.extend({
         return {
             "priceWithTax": all_taxes.total_included,
             "priceWithoutTax": all_taxes.total_excluded,
+            "priceSumTaxVoid": all_taxes.total_void,
             "tax": taxtotal,
             "taxDetails": taxdetail,
         };
