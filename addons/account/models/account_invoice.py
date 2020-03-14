@@ -1084,7 +1084,25 @@ class AccountInvoice(models.Model):
                 else:
                     tax_grouped[key]['amount'] += val['amount']
                     tax_grouped[key]['base'] += round_curr(val['base'])
-        return tax_grouped
+        return self._check_tax_minimum_base(tax_grouped)
+
+    def _check_tax_minimum_base(self, tax_grouped):
+        # Can be inherited to implement a diferent base condition
+        base_check = {}
+        to_delete = []
+        Tax = self.env['account.tax']
+        for vals in tax_grouped.values():
+            base_check.setdefault(vals['tax_id'], 0.0)
+            base_check[vals['tax_id']] += vals['base']
+        for tax_id, base in base_check.items():
+            tax_base = Tax.browse(tax_id).get_minimum_base_amount(self.currency_id, self._get_currency_rate_date())
+            if not base > tax_base:
+                to_delete.append(tax_id)
+        tax_grouped_cpy = {}
+        for grouping_key, vals in tax_grouped.items():
+            if vals['tax_id'] not in to_delete:
+                tax_grouped_cpy.update({grouping_key: vals})
+        return tax_grouped_cpy
 
     @api.multi
     def _get_aml_for_register_payment(self):
